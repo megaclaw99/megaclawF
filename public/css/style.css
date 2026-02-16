@@ -161,28 +161,58 @@ h1 { font-size: 4rem; font-weight: 900; margin-bottom: 1.5rem; color: var(--dark
 }
 .action-btn:hover { background: transparent; color: var(--dark-primary); transform: translateY(-2px); }
 
-/* ── Installation Steps ────────────────────────────────── */
-.installation { max-width: 1200px; margin: 6rem auto; padding: 0 2rem; }
-.section-title { font-size: 2.5rem; font-weight: 900; text-align: center; margin-bottom: 4rem; color: var(--dark-primary); }
-.steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px,1fr)); gap: 3rem; }
-.step-card { background: var(--light-secondary); border: 2px solid var(--dark-primary); border-radius: 16px; padding: 3rem; position: relative; transition: all 0.3s; }
-.step-card:hover { background: var(--light-primary); transform: translateY(-5px); box-shadow: 0 20px 60px rgba(25,25,26,.15); }
-.step-number { position: absolute; top: -25px; left: 30px; width: 60px; height: 60px; background: var(--dark-primary); color: var(--light-primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 900; box-shadow: 0 10px 30px rgba(25,25,26,.2); }
-.step-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; margin-top: 1rem; color: var(--dark-primary); text-transform: uppercase; }
-.step-description { color: var(--text-muted); margin-bottom: 1.5rem; font-size: 1rem; line-height: 1.6; }
-.code-snippet { background: var(--dark-primary); border: 2px solid var(--dark-primary); border-radius: 12px; padding: 1.5rem; font-family: 'JetBrains Mono', monospace; color: var(--light-primary); overflow-x: auto; font-size: 0.9rem; }
-
-/* ── Terminal ──────────────────────────────────────────── */
-.terminal-section { max-width: 1200px; margin: 4rem auto; padding: 0 2rem; }
-.terminal { background: var(--dark-primary); border: 2px solid var(--dark-primary); border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px rgba(25,25,26,.2); }
-.terminal-header { background: rgba(236,232,232,.1); padding: 1rem 1.5rem; border-bottom: 1px solid rgba(236,232,232,.2); font-family: 'JetBrains Mono', monospace; color: var(--light-secondary); font-size: 0.9rem; }
-.terminal-body { padding: 2rem; font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; line-height: 1.8; }
-.terminal-line { color: #6b6b6b; margin-bottom: 0.5rem; }
-.terminal-prompt { color: var(--light-secondary); }
-.terminal-command { color: var(--light-primary); }
-.terminal-comment { color: #4a4a4a; }
-.blinking-cursor { display: inline-block; width: 8px; height: 16px; background: var(--light-primary); margin-left: 5px; animation: blink 1s step-end infinite; }
-@keyframes blink { 50%{opacity:0} }
+/* ── How It Works ──────────────────────────────────────── */
+.how-it-works {
+  max-width: 800px;
+  margin: 6rem auto;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+.how-it-works-container {
+  background: var(--light-secondary);
+  border: 2px solid var(--dark-primary);
+  border-radius: 16px;
+  padding: 3rem 2rem;
+}
+.mascot-icon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+}
+.how-it-works h2 {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--dark-primary);
+  margin-bottom: 2rem;
+}
+.how-it-works-list {
+  text-align: left;
+  max-width: 600px;
+  margin: 0 auto 2.5rem;
+}
+.how-it-works-list p {
+  font-size: 1rem;
+  color: var(--text-dark);
+  margin-bottom: 1rem;
+  line-height: 1.8;
+}
+.how-it-works-list code {
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--light-primary);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: var(--dark-primary);
+}
+.how-it-works-actions {
+  margin-top: 2rem;
+}
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 900;
+  text-align: center;
+  margin-bottom: 4rem;
+  color: var(--dark-primary);
+}
 
 /* ── Launch Cards ──────────────────────────────────────── */
 .recent-launches { max-width: 1200px; margin: 6rem auto; padding: 0 2rem; }
@@ -262,10 +292,10 @@ body.dark-mode .featured-stats, body.dark-mode .recipient-section { background: 
 body.dark-mode .address-code, body.dark-mode .recipient-address { background: rgba(10,10,10,.8); color: #fff; border-color: rgba(255,255,255,.1); }
 body.dark-mode .action-btn { background: #fff; color: #000; border-color: #fff; }
 body.dark-mode .action-btn:hover { background: transparent; color: #fff; }
-body.dark-mode .step-card { background: rgba(20,20,20,.8); border-color: rgba(255,255,255,.1); }
-body.dark-mode .step-card:hover { background: rgba(30,30,30,.9); border-color: rgba(255,255,255,.2); }
-body.dark-mode .step-number { background: #fff; color: #000; }
-body.dark-mode .code-snippet { background: rgba(10,10,10,.8); border-color: rgba(255,255,255,.2); color: #e5e5e5; }
+body.dark-mode .how-it-works-container { background: rgba(20,20,20,.8); border-color: rgba(255,255,255,.1); }
+body.dark-mode .how-it-works h2 { color: #fff; }
+body.dark-mode .how-it-works-list p { color: #a0a0a0; }
+body.dark-mode .how-it-works-list code { background: rgba(10,10,10,.8); color: #e5e5e5; }
 body.dark-mode .launch-card { background: rgba(20,20,20,.8); border-color: rgba(255,255,255,.1); }
 body.dark-mode .launch-card:hover { background: rgba(30,30,30,.9); border-color: rgba(255,255,255,.2); }
 body.dark-mode .token-info h3, body.dark-mode .stat-value, body.dark-mode .view-token { color: #fff; }
