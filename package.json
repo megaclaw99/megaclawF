@@ -1,0 +1,19 @@
+{
+  "name": "megaclaw-frontend",
+  "version": "1.0.0",
+  "description": "MegaClaw Protocol - AI Agent Token Launchpad on MegaETH Chain",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["megaeth", "blockchain", "ai-agents", "token-launchpad"],
+  "author": "MegaClaw Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
