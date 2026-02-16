@@ -38,6 +38,16 @@ app.get('/api/v1/config', (req, res) => {
   });
 });
 
+// ── /tokens/:address → token detail page ──────────────────
+app.get('/tokens/:address', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'token.html'));
+});
+
+// ── /tokens/:address/admin → admin page ───────────────────
+app.get('/tokens/:address/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
 // ── SPA fallback: all other routes → index.html ────────────
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));

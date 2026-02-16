@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Token admin - Claim fees on MegaClaw Protocol">
+  <title>Admin | MegaClaw Protocol</title>
+  <link rel="icon" href="/logo.jpg">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .admin-page {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+    }
+    .admin-header {
+      margin-bottom: 2rem;
+    }
+    .admin-title {
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--dark-primary);
+      margin-bottom: 0.5rem;
+    }
+    .admin-subtitle {
+      color: var(--text-muted);
+    }
+    .admin-card {
+      background: var(--light-secondary);
+      border: 2px solid var(--dark-primary);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .admin-card h3 {
+      font-size: 1.25rem;
+      margin-bottom: 1.5rem;
+      color: var(--dark-primary);
+    }
+    .fee-display {
+      background: var(--light-primary);
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .fee-amount {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--dark-primary);
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 0.5rem;
+    }
+    .fee-label {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .btn-claim {
+      width: 100%;
+      padding: 1rem;
+      background: var(--dark-primary);
+      color: var(--light-primary);
+      border: 2px solid var(--dark-primary);
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-claim:hover {
+      background: transparent;
+      color: var(--dark-primary);
+    }
+    .btn-claim:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .info-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .info-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+    }
+    .info-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--dark-primary);
+      word-break: break-all;
+    }
+    .alert-info {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+    .alert-warning {
+      background: rgba(234, 179, 8, 0.1);
+      border: 1px solid rgba(234, 179, 8, 0.3);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+    .code-block {
+      background: var(--dark-primary);
+      color: var(--light-primary);
+      padding: 1rem;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      margin-top: 1rem;
+    }
+    body.dark-mode .admin-title { color: #fff; }
+    body.dark-mode .admin-card {
+      background: rgba(20,20,20,.8);
+      border-color: rgba(255,255,255,.1);
+    }
+    body.dark-mode .fee-display {
+      background: rgba(10,10,10,.8);
+    }
+    body.dark-mode .fee-amount,
+    body.dark-mode .info-value {
+      color: #fff;
+    }
+    body.dark-mode .btn-claim {
+      background: #fff;
+      color: #000;
+      border-color: #fff;
+    }
+    body.dark-mode .btn-claim:hover {
+      background: transparent;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+<div class="matrix-bg"></div>
+<div class="content-wrapper">
+
+  <!-- NAV -->
+  <nav>
+    <div class="logo-section" onclick="window.location.href='/'">
+      <img src="/logo.jpg" alt="MegaClaw" class="logo-img">
+      <div class="logo-text">MEGACLAW</div>
+    </div>
+    <div class="nav-right">
+      <button id="theme-toggle" class="icon-btn" aria-label="Toggle theme">
+        <svg class="theme-icon sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="theme-icon moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <a href="https://x.com/megaclaw_io" target="_blank" class="icon-btn" aria-label="Twitter/X">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+    </div>
+  </nav>
+
+  <div class="admin-page">
+    <div class="admin-header">
+      <h1 class="admin-title">Token Admin</h1>
+      <p class="admin-subtitle">Manage fees for <span id="token-name">...</span></p>
+    </div>
+
+    <div class="admin-card">
+      <h3>Claimable Fees</h3>
+      
+      <div class="alert-info">
+        <strong>Note:</strong> Fees accumulate from Uniswap V4 LP trading activity. You earn 80% of trading fees in WETH.
+      </div>
+
+      <div class="fee-display">
+        <div class="fee-amount" id="weth-fees">0.0000</div>
+        <div class="fee-label">WETH Available to Claim</div>
+      </div>
+
+      <button class="btn-claim" id="claim-btn" onclick="claimFees()" disabled>
+        Connect Wallet to Claim
+      </button>
+    </div>
+
+    <div class="admin-card">
+      <h3>Token Information</h3>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Token Address</span>
+          <span class="info-value" id="token-address">Loading...</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Your Wallet</span>
+          <span class="info-value" id="wallet-address">Not connected</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">FeeLocker Contract</span>
+          <span class="info-value">0xF3622...</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Chain</span>
+          <span class="info-value">MegaETH (4326)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <h3>Manual Claiming (CLI)</h3>
+      
+      <div class="alert-warning">
+        <strong>Alternative:</strong> Claim fees programmatically using this script.
+      </div>
+
+      <p style="margin-bottom: 1rem; color: var(--text-muted);">
+        Copy and run this code to claim your fees directly:
+      </p>
+
+      <div class="code-block" id="claim-script">Loading script...</div>
+      
+      <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-muted);">
+        Requires: Node.js, viem library, and your private key. See <a href="/skill" style="color: var(--dark-primary)">documentation</a> for details.
+      </p>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+// Theme toggle
+const themeToggle = document.getElementById('theme-toggle');
+if ((localStorage.getItem('theme') || 'light') === 'dark') {
+  document.body.classList.add('dark-mode');
+}
+themeToggle.addEventListener('click', () => {
+  document.body.classList.toggle('dark-mode');
+  localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+});
+
+// Get token address from URL
+const urlParts = window.location.pathname.split('/');
+const tokenAddress = urlParts[2];
+
+if (!tokenAddress || !tokenAddress.startsWith('0x')) {
+  document.getElementById('token-name').textContent = 'Invalid Address';
+  document.getElementById('token-address').textContent = 'Invalid token address';
+} else {
+  document.getElementById('token-address').textContent = tokenAddress;
+  loadTokenInfo(tokenAddress);
+  generateClaimScript(tokenAddress);
+}
+
+async function loadTokenInfo(address) {
+  try {
+    const response = await fetch(`https://megaeth.blockscout.com/api/v2/tokens/${address}`);
+    const data = await response.json();
+    document.getElementById('token-name').textContent = data.name || 'Unknown Token';
+  } catch (error) {
+    console.error('Error loading token:', error);
+    document.getElementById('token-name').textContent = 'Error loading token';
+  }
+}
+
+function generateClaimScript(tokenAddress) {
+  const script = `import { createPublicClient, createWalletClient, http, formatEther } from 'viem';
+import { base } from 'viem/chains';
+import { privateKeyToAccount } from 'viem/accounts';
+
+const PRIVATE_KEY = process.env.PRIVATE_KEY;
+const TOKEN_ADDRESS = '${tokenAddress}';
+const WETH_ADDRESS = '0x4200000000000000000000000000000000000006';
+const FEE_LOCKER = '0xF3622742b1E446D92e45E22923Ef11C2fcD55D68';
+
+const account = privateKeyToAccount(PRIVATE_KEY);
+const publicClient = createPublicClient({
+  chain: base,
+  transport: http('https://mainnet.base.org'),
+});
+
+const walletClient = createWalletClient({
+  account,
+  chain: base,
+  transport: http('https://mainnet.base.org'),
+});
+
+// Check fees
+const wethFees = await publicClient.readContract({
+  address: FEE_LOCKER,
+  abi: [{
+    inputs: [{ name: 'feeOwner', type: 'address' }, { name: 'token', type: 'address' }],
+    name: 'feesToClaim',
+    outputs: [{ name: 'balance', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function'
+  }],
+  functionName: 'feesToClaim',
+  args: [account.address, WETH_ADDRESS],
+});
+
+console.log('WETH fees:', formatEther(wethFees));
+
+// Claim fees
+if (wethFees > 0n) {
+  const hash = await walletClient.writeContract({
+    address: FEE_LOCKER,
+    abi: [{
+      inputs: [{ name: 'feeOwner', type: 'address' }, { name: 'token', type: 'address' }],
+      name: 'claim',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function'
+    }],
+    functionName: 'claim',
+    args: [account.address, WETH_ADDRESS],
+  });
+  console.log('Claim tx:', hash);
+}`;
+  
+  document.getElementById('claim-script').textContent = script;
+}
+
+async function claimFees() {
+  alert('Connect your wallet first! Use MetaMask or WalletConnect to claim fees.');
+  // TODO: Implement wallet connection and claiming via Web3
+}
+</script>
+
+</body>
+</html>
