@@ -83,14 +83,23 @@
       cursor: not-allowed;
     }
     .btn-connect {
-      background: #1DA1F2;
-      border-color: #1DA1F2;
-      color: white;
+      background: var(--dark-primary);
+      border-color: var(--dark-primary);
+      color: var(--light-primary);
       margin-bottom: 1rem;
     }
     .btn-connect:hover {
       background: transparent;
-      color: #1DA1F2;
+      color: var(--dark-primary);
+    }
+    body.dark-mode .btn-connect {
+      background: #fff;
+      color: #000;
+      border-color: #fff;
+    }
+    body.dark-mode .btn-connect:hover {
+      background: transparent;
+      color: #fff;
     }
     .info-grid {
       display: grid;
@@ -149,6 +158,21 @@
       margin-top: 1rem;
       text-align: center;
       display: none;
+    }
+    .access-denied {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+      text-align: center;
+      color: #dc2626;
+      display: none;
+    }
+    body.dark-mode .access-denied {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.5);
+      color: #fca5a5;
     }
     
     /* Dark Mode */
@@ -282,6 +306,14 @@
         <strong>✅ Fees claimed successfully!</strong>
         <div>Transaction hash: <span id="claim-tx"></span></div>
       </div>
+      
+      <div id="access-denied" class="access-denied">
+        <strong>🚫 Access Denied</strong>
+        <div>Only the token creator can claim fees for this token.</div>
+        <div style="margin-top: 0.5rem; font-size: 0.875rem;">
+          Creator: <span id="creator-address"></span>
+        </div>
+      </div>
     </div>
 
     <div class="admin-card">
@@ -315,6 +347,7 @@
 let walletConnected = false;
 let userAddress = null;
 let tokenData = null;
+let creatorAddress = null;
 
 // Theme toggle
 const themeToggle = document.getElementById('theme-toggle');
@@ -343,7 +376,16 @@ async function loadTokenInfo(address) {
     const response = await fetch(`https://megaeth.blockscout.com/api/v2/tokens/${address}`);
     const data = await response.json();
     tokenData = data;
+    creatorAddress = data.creator_address_hash;
+    
     document.getElementById('token-name').textContent = data.name || 'Unknown Token';
+    
+    // Update creator address display
+    if (creatorAddress) {
+      document.getElementById('creator-address').textContent = 
+        `${creatorAddress.slice(0, 6)}...${creatorAddress.slice(-4)}`;
+    }
+    
   } catch (error) {
     console.error('Error loading token:', error);
     document.getElementById('token-name').textContent = 'Error loading token';
@@ -392,6 +434,7 @@ function updateWalletUI() {
   const walletAddressEl = document.getElementById('wallet-address');
   const connectedWalletEl = document.getElementById('connected-wallet');
   const claimBtn = document.getElementById('claim-btn');
+  const accessDenied = document.getElementById('access-denied');
   
   if (walletConnected && userAddress) {
     connectBtn.style.display = 'none';
@@ -401,9 +444,20 @@ function updateWalletUI() {
     connectedWalletEl.textContent = shortAddress;
     walletInfo.style.display = 'block';
     
-    claimBtn.style.display = 'block';
-    claimBtn.textContent = 'Claim Fees';
-    claimBtn.disabled = false;
+    // Check if connected wallet is the creator
+    const isCreator = creatorAddress && userAddress.toLowerCase() === creatorAddress.toLowerCase();
+    
+    if (isCreator) {
+      // User is creator - allow claiming
+      claimBtn.style.display = 'block';
+      claimBtn.textContent = 'Claim Fees';
+      claimBtn.disabled = false;
+      accessDenied.style.display = 'none';
+    } else {
+      // User is not creator - deny access
+      claimBtn.style.display = 'none';
+      accessDenied.style.display = 'block';
+    }
   }
 }
 
@@ -411,15 +465,28 @@ async function loadFeeData() {
   if (!walletConnected || !userAddress) return;
   
   try {
-    // TODO: Implement actual fee checking with MegaETH
-    // For now, showing placeholder data
-    const randomFees = (Math.random() * 0.1).toFixed(4);
-    document.getElementById('weth-fees').textContent = randomFees;
+    // Check if user is the creator
+    const isCreator = creatorAddress && userAddress.toLowerCase() === creatorAddress.toLowerCase();
     
-    // Update wallet balance
-    const balanceEl = document.getElementById('wallet-balance');
-    if (balanceEl) {
-      balanceEl.textContent = `Balance: ${randomFees} WETH`;
+    if (isCreator) {
+      // TODO: Implement actual fee checking with MegaETH
+      // For now, showing placeholder data for creators only
+      const randomFees = (Math.random() * 0.1).toFixed(4);
+      document.getElementById('weth-fees').textContent = randomFees;
+      
+      // Update wallet balance
+      const balanceEl = document.getElementById('wallet-balance');
+      if (balanceEl) {
+        balanceEl.textContent = `Balance: ${randomFees} WETH`;
+      }
+    } else {
+      // Non-creator sees 0 fees
+      document.getElementById('weth-fees').textContent = '0.0000';
+      
+      const balanceEl = document.getElementById('wallet-balance');
+      if (balanceEl) {
+        balanceEl.textContent = 'Balance: 0.0000 WETH';
+      }
     }
   } catch (error) {
     console.error('Error loading fee data:', error);
@@ -429,6 +496,13 @@ async function loadFeeData() {
 async function claimFees() {
   if (!walletConnected) {
     alert('Please connect your wallet first');
+    return;
+  }
+  
+  // Check if user is the creator
+  const isCreator = creatorAddress && userAddress.toLowerCase() === creatorAddress.toLowerCase();
+  if (!isCreator) {
+    alert('Only the token creator can claim fees for this token.');
     return;
   }
   
