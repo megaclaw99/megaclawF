@@ -58,8 +58,10 @@ nav {
 }
 .logo-section { display: flex; align-items: center; gap: 1rem; cursor: pointer; }
 .logo-img {
-    width: 50px; height: 50px; background: var(--dark-primary); border-radius: 12px;
-    display: flex; align-items: center; justify-content: center; font-size: 1.8rem;
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    object-fit: contain;
     transition: all 0.3s;
 }
 .logo-img:hover { transform: scale(1.05); }
@@ -90,12 +92,14 @@ nav {
 }
 .mascot-container { display: flex; justify-content: center; margin-bottom: 3rem; }
 .mascot {
-    width: 200px; height: 200px; background: var(--dark-primary); border-radius: 30px;
-    display: flex; align-items: center; justify-content: center; font-size: 6rem;
-    animation: float 3s ease-in-out infinite; transition: all 0.3s;
-    box-shadow: 0 20px 60px rgba(25,25,26,.2);
+    width: 200px;
+    height: 200px;
+    border-radius: 30px;
+    object-fit: contain;
+    animation: float 3s ease-in-out infinite;
+    transition: all 0.3s;
 }
-.mascot:hover { transform: scale(1.05); box-shadow: 0 25px 80px rgba(25,25,26,.3); }
+.mascot:hover { transform: scale(1.05); }
 @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-15px)} }
 h1 { font-size: 4rem; font-weight: 900; margin-bottom: 1.5rem; color: var(--dark-primary); line-height: 1.2; letter-spacing: -1px; }
 .subtitle { font-size: 1.5rem; color: var(--text-dark); margin-bottom: 1rem; font-weight: 600; }
@@ -214,8 +218,10 @@ h1 { font-size: 4rem; font-weight: 900; margin-bottom: 1.5rem; color: var(--dark
   padding: 3rem 2rem;
 }
 .mascot-icon {
-  font-size: 4rem;
-  margin-bottom: 1.5rem;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1.5rem;
+  object-fit: contain;
 }
 .how-it-works h2 {
   font-size: 2rem;
@@ -280,7 +286,7 @@ h1 { font-size: 4rem; font-weight: 900; margin-bottom: 1.5rem; color: var(--dark
 footer { border-top: 2px solid var(--dark-primary); padding: 4rem 3rem 2rem; margin-top: 8rem; background: var(--light-secondary); }
 .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 3rem; max-width: 1200px; margin: 0 auto 3rem; }
 .footer-logo { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
-.footer-logo-img { width: 40px; height: 40px; background: var(--dark-primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+.footer-logo-img { width: 40px; height: 40px; border-radius: 8px; object-fit: contain; }
 .footer-section h4 { color: var(--dark-primary); font-size: 1rem; margin-bottom: 1rem; font-weight: 700; }
 .footer-section p { color: var(--text-muted); line-height: 1.6; font-size: 0.95rem; }
 .footer-links { list-style: none; }
@@ -319,7 +325,6 @@ body.dark-mode .sun-icon { display: none; }
 body.dark-mode .moon-icon { display: block; }
 body.dark-mode h1, body.dark-mode .subtitle, body.dark-mode .section-title, body.dark-mode .featured-title, body.dark-mode .footer-section h4 { color: #fff; }
 body.dark-mode .description, body.dark-mode .featured-subtitle { color: #a0a0a0; }
-body.dark-mode .mascot { background: linear-gradient(135deg,#1a1a1a,#2a2a2a); border: 1px solid rgba(255,255,255,.1); }
 body.dark-mode .btn-primary { background: #fff; color: #000; border-color: #fff; }
 body.dark-mode .btn-primary:hover { background: transparent; color: #fff; }
 body.dark-mode .btn-secondary { border-color: rgba(255,255,255,.3); color: #fff; }
@@ -337,7 +342,6 @@ body.dark-mode .launch-card:hover { background: rgba(30,30,30,.9); border-color:
 body.dark-mode .token-info h3, body.dark-mode .stat-value, body.dark-mode .view-token { color: #fff; }
 body.dark-mode .launch-footer { border-top-color: rgba(255,255,255,.05); }
 body.dark-mode footer { background: rgba(10,10,10,.5); border-top-color: rgba(255,255,255,.1); }
-body.dark-mode .footer-logo-img { background: #fff; }
 body.dark-mode .footer-links a:hover { color: #fff; }
 body.dark-mode .footer-bottom { border-top-color: rgba(255,255,255,.05); }
 body.dark-mode .copy-toast { background: #fff; color: #000; }
@@ -355,7 +359,7 @@ body.dark-mode .subpage-content a { color: #fff; }
     .status-indicator span { display: none; }
     .status-indicator { padding: 0.5rem; width: 40px; height: 40px; justify-content: center; }
     .hero { padding: 4rem 1rem 2rem; }
-    .mascot { width: 150px; height: 150px; font-size: 4rem; }
+    .mascot { width: 150px; height: 150px; }
     .featured-header { flex-direction: column; align-items: center; text-align: center; }
     .featured-stats { grid-template-columns: repeat(2,1fr); }
     .featured-actions { flex-direction: column; }
