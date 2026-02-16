@@ -112,6 +112,114 @@
     body.dark-mode .nav-link:hover {
       background: rgba(255, 255, 255, 0.1);
     }
+    
+    /* Wallet button in nav */
+    .wallet-btn {
+      background: var(--dark-primary);
+      color: var(--light-primary);
+      border: 2px solid var(--dark-primary);
+      border-radius: 6px;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-right: 0.5rem;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .wallet-btn:hover {
+      background: transparent;
+      color: var(--dark-primary);
+    }
+    .wallet-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    .wallet-btn.connected {
+      background: #10b981;
+      border-color: #10b981;
+      color: white;
+    }
+    .wallet-btn.connected:hover {
+      background: transparent;
+      color: #10b981;
+    }
+    
+    body.dark-mode .wallet-btn {
+      background: #fff;
+      color: #000;
+      border-color: #fff;
+    }
+    body.dark-mode .wallet-btn:hover {
+      background: transparent;
+      color: #fff;
+    }
+    body.dark-mode .wallet-btn.connected {
+      background: #10b981;
+      border-color: #10b981;
+      color: white;
+    }
+    body.dark-mode .wallet-btn.connected:hover {
+      background: transparent;
+      color: #10b981;
+    }
+    
+    /* Wallet dropdown for disconnect */
+    .wallet-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .wallet-dropdown-content {
+      display: none;
+      position: absolute;
+      right: 0;
+      background: var(--light-secondary);
+      border: 2px solid var(--dark-primary);
+      border-radius: 8px;
+      min-width: 200px;
+      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+      z-index: 1000;
+      top: 100%;
+      margin-top: 0.5rem;
+    }
+    .wallet-dropdown-content.show {
+      display: block;
+    }
+    .wallet-info {
+      padding: 1rem;
+      font-size: 0.875rem;
+    }
+    .wallet-address {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--dark-primary);
+      margin-bottom: 0.5rem;
+    }
+    .wallet-balance {
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+    .disconnect-btn {
+      width: 100%;
+      padding: 0.5rem;
+      background: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .disconnect-btn:hover {
+      background: #dc2626;
+    }
+    
+    body.dark-mode .wallet-dropdown-content {
+      background: rgba(20,20,20,.9);
+      border-color: rgba(255,255,255,.2);
+    }
+    body.dark-mode .wallet-address {
+      color: #fff;
+    }
   </style>
 </head>
 <body>
@@ -127,6 +235,18 @@
     </div>
     <div class="nav-right">
       <a href="#" onclick="window.location.href=window.location.href.replace('/admin', '')" class="nav-link">← Back to Token</a>
+      <div class="wallet-dropdown">
+        <button id="wallet-btn" class="wallet-btn">
+          Connect Wallet
+        </button>
+        <div id="wallet-dropdown" class="wallet-dropdown-content">
+          <div class="wallet-info">
+            <div id="wallet-address" class="wallet-address">0x...</div>
+            <div id="wallet-balance" class="wallet-balance">0 ETH</div>
+            <button id="disconnect-btn" class="disconnect-btn">Disconnect</button>
+          </div>
+        </div>
+      </div>
       <button id="theme-toggle" class="icon-btn" aria-label="Toggle theme">
         <svg class="theme-icon sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         <svg class="theme-icon moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -177,6 +297,10 @@
 </div>
 
 <script>
+// Global wallet state
+let isWalletConnected = false;
+let walletAddress = null;
+
 // Theme toggle
 const themeToggle = document.getElementById('theme-toggle');
 if ((localStorage.getItem('theme') || 'light') === 'dark') {
@@ -185,6 +309,175 @@ if ((localStorage.getItem('theme') || 'light') === 'dark') {
 themeToggle.addEventListener('click', () => {
   document.body.classList.toggle('dark-mode');
   localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+});
+
+// Wallet functionality
+async function connectWallet() {
+  if (typeof window.ethereum !== 'undefined') {
+    try {
+      // Request account access
+      const accounts = await window.ethereum.request({
+        method: 'eth_requestAccounts'
+      });
+      
+      if (accounts.length > 0) {
+        walletAddress = accounts[0];
+        isWalletConnected = true;
+        
+        // Switch to MegaETH network
+        await switchToMegaETH();
+        
+        // Update UI
+        updateWalletUI();
+        
+        // Get balance
+        await updateWalletBalance();
+        
+        console.log('Wallet connected:', walletAddress);
+      }
+    } catch (error) {
+      console.error('Error connecting wallet:', error);
+      alert('Failed to connect wallet. Please try again.');
+    }
+  } else {
+    alert('MetaMask or another Web3 wallet is required. Please install one to continue.');
+  }
+}
+
+async function disconnectWallet() {
+  walletAddress = null;
+  isWalletConnected = false;
+  updateWalletUI();
+  console.log('Wallet disconnected');
+}
+
+async function switchToMegaETH() {
+  try {
+    // Try to switch to MegaETH
+    await window.ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: '0x10e6' }], // 4326 in hex
+    });
+  } catch (switchError) {
+    // Network doesn't exist, add it
+    if (switchError.code === 4902) {
+      try {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [{
+            chainId: '0x10e6',
+            chainName: 'MegaETH Mainnet',
+            nativeCurrency: {
+              name: 'ETH',
+              symbol: 'ETH',
+              decimals: 18
+            },
+            rpcUrls: ['https://mainnet.megaeth.com/rpc'],
+            blockExplorerUrls: ['https://mega.etherscan.io/']
+          }],
+        });
+      } catch (addError) {
+        console.error('Failed to add MegaETH network:', addError);
+      }
+    }
+  }
+}
+
+async function updateWalletBalance() {
+  if (!isWalletConnected || !walletAddress) return;
+  
+  try {
+    const balance = await window.ethereum.request({
+      method: 'eth_getBalance',
+      params: [walletAddress, 'latest']
+    });
+    
+    // Convert from wei to ETH
+    const ethBalance = (parseInt(balance, 16) / 1e18).toFixed(4);
+    document.getElementById('wallet-balance').textContent = `${ethBalance} ETH`;
+  } catch (error) {
+    console.error('Error getting balance:', error);
+    document.getElementById('wallet-balance').textContent = 'Error loading balance';
+  }
+}
+
+function updateWalletUI() {
+  const walletBtn = document.getElementById('wallet-btn');
+  const walletDropdown = document.getElementById('wallet-dropdown');
+  const walletAddressEl = document.getElementById('wallet-address');
+  
+  if (isWalletConnected && walletAddress) {
+    // Connected state
+    walletBtn.textContent = `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`;
+    walletBtn.classList.add('connected');
+    walletAddressEl.textContent = walletAddress;
+  } else {
+    // Disconnected state
+    walletBtn.textContent = 'Connect Wallet';
+    walletBtn.classList.remove('connected');
+    walletDropdown.classList.remove('show');
+  }
+}
+
+// Event listeners
+document.getElementById('wallet-btn').addEventListener('click', function() {
+  if (isWalletConnected) {
+    // Toggle dropdown
+    const dropdown = document.getElementById('wallet-dropdown');
+    dropdown.classList.toggle('show');
+  } else {
+    // Connect wallet
+    connectWallet();
+  }
+});
+
+document.getElementById('disconnect-btn').addEventListener('click', function() {
+  disconnectWallet();
+});
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+  const walletDropdown = document.querySelector('.wallet-dropdown');
+  if (!walletDropdown.contains(event.target)) {
+    document.getElementById('wallet-dropdown').classList.remove('show');
+  }
+});
+
+// Listen for account changes
+if (window.ethereum) {
+  window.ethereum.on('accountsChanged', function (accounts) {
+    if (accounts.length === 0) {
+      disconnectWallet();
+    } else if (accounts[0] !== walletAddress) {
+      walletAddress = accounts[0];
+      updateWalletUI();
+      updateWalletBalance();
+    }
+  });
+  
+  window.ethereum.on('chainChanged', function (chainId) {
+    // Reload the page when chain changes
+    window.location.reload();
+  });
+}
+
+// Check if already connected on page load
+window.addEventListener('load', async function() {
+  if (window.ethereum) {
+    try {
+      const accounts = await window.ethereum.request({
+        method: 'eth_accounts'
+      });
+      if (accounts.length > 0) {
+        walletAddress = accounts[0];
+        isWalletConnected = true;
+        updateWalletUI();
+        updateWalletBalance();
+      }
+    } catch (error) {
+      console.error('Error checking wallet connection:', error);
+    }
+  }
 });
 
 // Get token address from URL
