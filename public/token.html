@@ -295,6 +295,37 @@
       background: #fff;
       color: #000;
     }
+    
+    /* Wallet button in nav */
+    .wallet-btn {
+      background: #1DA1F2;
+      color: white;
+      border: 2px solid #1DA1F2;
+      border-radius: 6px;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-right: 0.5rem;
+      transition: all 0.2s;
+    }
+    .wallet-btn:hover {
+      background: transparent;
+      color: #1DA1F2;
+    }
+    .wallet-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    body.dark-mode .wallet-btn {
+      background: #1DA1F2;
+      color: white;
+      border-color: #1DA1F2;
+    }
+    body.dark-mode .wallet-btn:hover {
+      background: transparent;
+      color: #1DA1F2;
+    }
   </style>
 </head>
 <body>
@@ -309,6 +340,9 @@
       <div class="logo-text">MEGACLAW</div>
     </div>
     <div class="nav-right">
+      <button id="connect-wallet-btn" class="wallet-btn">
+        🔗 Connect
+      </button>
       <button id="theme-toggle" class="icon-btn" aria-label="Toggle theme">
         <svg class="theme-icon sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         <svg class="theme-icon moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -336,19 +370,6 @@
 
       <!-- Actions Section -->
       <div class="actions-section">
-        <!-- Wallet Connection -->
-        <div class="action-card">
-          <h3>Wallet</h3>
-          <div id="wallet-section">
-            <button id="connect-wallet-btn" class="btn-connect">
-              🔗 Connect Wallet
-            </button>
-            <div id="wallet-info" class="wallet-info" style="display: none;">
-              <div id="wallet-address"></div>
-              <div id="wallet-balance"></div>
-            </div>
-          </div>
-        </div>
         
         <div class="action-card">
           <h3>Contract</h3>
@@ -361,6 +382,9 @@
 
         <div class="action-card">
           <h3>Trading</h3>
+          <div id="wallet-info" class="wallet-info" style="display: none;">
+            <div id="wallet-address"></div>
+          </div>
           <button id="trade-btn" class="btn-trade">Trade (Loading...)</button>
           
           <!-- Trading Interface -->
@@ -540,10 +564,10 @@ function updateWalletUI() {
   const walletAddressEl = document.getElementById('wallet-address');
   
   if (walletConnected && userAddress) {
-    connectBtn.textContent = '✅ Wallet Connected';
+    connectBtn.textContent = '✅ Connected';
     connectBtn.disabled = true;
     
-    walletAddressEl.textContent = `Address: ${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
+    walletAddressEl.textContent = `Connected: ${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
     walletInfo.style.display = 'block';
     
     // Enable trading buttons

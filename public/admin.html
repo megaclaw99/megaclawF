@@ -196,6 +196,26 @@
       border-color: rgba(16, 185, 129, 0.5);
       color: #e5e5e5;
     }
+    
+    /* Navigation link */
+    .nav-link {
+      color: var(--dark-primary);
+      text-decoration: none;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      margin-right: 0.5rem;
+      transition: all 0.2s;
+    }
+    .nav-link:hover {
+      background: rgba(25, 25, 26, 0.1);
+    }
+    body.dark-mode .nav-link {
+      color: #fff;
+    }
+    body.dark-mode .nav-link:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
   </style>
 </head>
 <body>
@@ -210,6 +230,7 @@
       <div class="logo-text">MEGACLAW</div>
     </div>
     <div class="nav-right">
+      <a href="#" onclick="window.location.href=window.location.href.replace('/admin', '')" class="nav-link">← Back to Token</a>
       <button id="theme-toggle" class="icon-btn" aria-label="Toggle theme">
         <svg class="theme-icon sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         <svg class="theme-icon moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -226,24 +247,6 @@
       <p class="admin-subtitle">Manage fees for <span id="token-name">...</span></p>
     </div>
 
-    <!-- Wallet Connection -->
-    <div class="admin-card">
-      <h3>Wallet Connection</h3>
-      <div id="wallet-section">
-        <button id="connect-wallet-btn" class="btn-connect">
-          🔗 Connect Wallet
-        </button>
-        <div id="wallet-info" class="wallet-info" style="display: none;">
-          <div class="wallet-status">
-            <div class="status-dot"></div>
-            <strong>Wallet Connected</strong>
-          </div>
-          <div id="wallet-address"></div>
-          <div id="wallet-balance"></div>
-        </div>
-      </div>
-    </div>
-
     <div class="admin-card">
       <h3>Claimable Fees</h3>
       
@@ -256,8 +259,23 @@
         <div class="fee-label">WETH Available to Claim</div>
       </div>
 
-      <button class="btn-claim" id="claim-btn" onclick="claimFees()" disabled>
-        Connect Wallet to Claim
+      <!-- Wallet Connection for Claims -->
+      <div id="wallet-section">
+        <button id="connect-wallet-btn" class="btn-connect">
+          🔗 Connect Wallet to Claim
+        </button>
+        <div id="wallet-info" class="wallet-info" style="display: none;">
+          <div class="wallet-status">
+            <div class="status-dot"></div>
+            <strong>Wallet Connected</strong>
+          </div>
+          <div id="wallet-address"></div>
+          <div id="wallet-balance"></div>
+        </div>
+      </div>
+
+      <button class="btn-claim" id="claim-btn" onclick="claimFees()" disabled style="display: none;">
+        Claim Fees
       </button>
       
       <div id="claim-success" class="claim-success">
@@ -376,14 +394,14 @@ function updateWalletUI() {
   const claimBtn = document.getElementById('claim-btn');
   
   if (walletConnected && userAddress) {
-    connectBtn.textContent = '✅ Wallet Connected';
-    connectBtn.disabled = true;
+    connectBtn.style.display = 'none';
     
     const shortAddress = `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
     walletAddressEl.textContent = `Address: ${shortAddress}`;
     connectedWalletEl.textContent = shortAddress;
     walletInfo.style.display = 'block';
     
+    claimBtn.style.display = 'block';
     claimBtn.textContent = 'Claim Fees';
     claimBtn.disabled = false;
   }
