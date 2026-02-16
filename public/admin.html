@@ -242,23 +242,6 @@
       </div>
     </div>
 
-    <div class="admin-card">
-      <h3>Manual Claiming (CLI)</h3>
-      
-      <div class="alert-warning">
-        <strong>Alternative:</strong> Claim fees programmatically using this script.
-      </div>
-
-      <p style="margin-bottom: 1rem; color: var(--text-muted);">
-        Copy and run this code to claim your fees directly:
-      </p>
-
-      <div class="code-block" id="claim-script">Loading script...</div>
-      
-      <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-muted);">
-        Requires: Node.js, viem library, and your private key. See <a href="/skill" style="color: var(--dark-primary)">documentation</a> for details.
-      </p>
-    </div>
 
   </div>
 
@@ -285,7 +268,6 @@ if (!tokenAddress || !tokenAddress.startsWith('0x')) {
 } else {
   document.getElementById('token-address').textContent = tokenAddress;
   loadTokenInfo(tokenAddress);
-  generateClaimScript(tokenAddress);
 }
 
 async function loadTokenInfo(address) {
@@ -297,64 +279,6 @@ async function loadTokenInfo(address) {
     console.error('Error loading token:', error);
     document.getElementById('token-name').textContent = 'Error loading token';
   }
-}
-
-function generateClaimScript(tokenAddress) {
-  const script = `import { createPublicClient, createWalletClient, http, formatEther } from 'viem';
-import { base } from 'viem/chains';
-import { privateKeyToAccount } from 'viem/accounts';
-
-const PRIVATE_KEY = process.env.PRIVATE_KEY;
-const TOKEN_ADDRESS = '${tokenAddress}';
-const WETH_ADDRESS = '0x4200000000000000000000000000000000000006';
-const FEE_LOCKER = '0xF3622742b1E446D92e45E22923Ef11C2fcD55D68';
-
-const account = privateKeyToAccount(PRIVATE_KEY);
-const publicClient = createPublicClient({
-  chain: base,
-  transport: http('https://mainnet.base.org'),
-});
-
-const walletClient = createWalletClient({
-  account,
-  chain: base,
-  transport: http('https://mainnet.base.org'),
-});
-
-// Check fees
-const wethFees = await publicClient.readContract({
-  address: FEE_LOCKER,
-  abi: [{
-    inputs: [{ name: 'feeOwner', type: 'address' }, { name: 'token', type: 'address' }],
-    name: 'feesToClaim',
-    outputs: [{ name: 'balance', type: 'uint256' }],
-    stateMutability: 'view',
-    type: 'function'
-  }],
-  functionName: 'feesToClaim',
-  args: [account.address, WETH_ADDRESS],
-});
-
-console.log('WETH fees:', formatEther(wethFees));
-
-// Claim fees
-if (wethFees > 0n) {
-  const hash = await walletClient.writeContract({
-    address: FEE_LOCKER,
-    abi: [{
-      inputs: [{ name: 'feeOwner', type: 'address' }, { name: 'token', type: 'address' }],
-      name: 'claim',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function'
-    }],
-    functionName: 'claim',
-    args: [account.address, WETH_ADDRESS],
-  });
-  console.log('Claim tx:', hash);
-}`;
-  
-  document.getElementById('claim-script').textContent = script;
 }
 
 async function claimFees() {
