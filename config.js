@@ -38,8 +38,8 @@ const CONFIG = {
   FEATURED_SCAN_URL: "#",
 
   // ── Socials & Links ──────────────────────────────────────
-  TWITTER_HANDLE: "megaclaw_eth",
-  TWITTER_URL: "https://twitter.com/megaclaw_eth",
+  TWITTER_HANDLE: "megaclaw_io",
+  TWITTER_URL: "https://x.com/megaclaw_io",
   SKILL_URL: "https://megaclaw.io/skill",
   ALERTS_URL: "#",
 
