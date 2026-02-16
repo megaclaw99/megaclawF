@@ -9,6 +9,9 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   
+  <!-- Privy SDK for vanilla JS -->
+  <script src="https://unpkg.com/@privy-io/js@latest/dist/index.umd.js"></script>
+  
   <style>
     .admin-page {
       max-width: 900px;
@@ -300,6 +303,8 @@
 // Global wallet state
 let isWalletConnected = false;
 let walletAddress = null;
+let privyUser = null;
+let privyInstance = null;
 
 // Theme toggle
 const themeToggle = document.getElementById('theme-toggle');
@@ -311,11 +316,86 @@ themeToggle.addEventListener('click', () => {
   localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
 });
 
-// Wallet functionality
+// Initialize Privy
+async function initPrivy() {
+  try {
+    if (typeof window.Privy !== 'undefined') {
+      privyInstance = window.Privy.createClient({
+        appId: 'clp0z7zeg0b9w0cjy6vzd3o6w', // Your Privy App ID
+        config: {
+          loginMethods: ['wallet', 'email'],
+          appearance: {
+            theme: 'light',
+            accentColor: '#19191A',
+          },
+          embeddedWallets: {
+            createOnLogin: 'users-without-wallets'
+          }
+        }
+      });
+      
+      // Check if user is already authenticated
+      const user = await privyInstance.getUser();
+      if (user && user.linkedAccounts?.find(acc => acc.type === 'wallet')) {
+        const walletAccount = user.linkedAccounts.find(acc => acc.type === 'wallet');
+        privyUser = user;
+        walletAddress = walletAccount.address;
+        isWalletConnected = true;
+        updateWalletUI();
+        await updateWalletBalance();
+      }
+      
+      console.log('Privy initialized successfully');
+    }
+  } catch (error) {
+    console.error('Privy initialization error:', error);
+  }
+}
+
+// Wallet functionality with Privy
 async function connectWallet() {
+  try {
+    if (!privyInstance) {
+      await initPrivy();
+    }
+    
+    if (privyInstance) {
+      // Login with Privy
+      const user = await privyInstance.login();
+      
+      if (user && user.linkedAccounts) {
+        const walletAccount = user.linkedAccounts.find(acc => acc.type === 'wallet');
+        if (walletAccount) {
+          privyUser = user;
+          walletAddress = walletAccount.address;
+          isWalletConnected = true;
+          
+          // Switch to MegaETH network
+          await switchToMegaETH();
+          
+          // Update UI
+          updateWalletUI();
+          
+          // Get balance
+          await updateWalletBalance();
+          
+          console.log('Wallet connected via Privy:', walletAddress);
+        }
+      }
+    } else {
+      // Fallback to direct MetaMask
+      await connectMetaMask();
+    }
+  } catch (error) {
+    console.error('Error connecting wallet:', error);
+    alert('Failed to connect wallet. Please try again.');
+  }
+}
+
+// Fallback MetaMask connection
+async function connectMetaMask() {
   if (typeof window.ethereum !== 'undefined') {
     try {
-      // Request account access
       const accounts = await window.ethereum.request({
         method: 'eth_requestAccounts'
       });
@@ -323,44 +403,47 @@ async function connectWallet() {
       if (accounts.length > 0) {
         walletAddress = accounts[0];
         isWalletConnected = true;
-        
-        // Switch to MegaETH network
         await switchToMegaETH();
-        
-        // Update UI
         updateWalletUI();
-        
-        // Get balance
         await updateWalletBalance();
-        
-        console.log('Wallet connected:', walletAddress);
+        console.log('MetaMask connected:', walletAddress);
       }
     } catch (error) {
-      console.error('Error connecting wallet:', error);
-      alert('Failed to connect wallet. Please try again.');
+      throw error;
     }
   } else {
-    alert('MetaMask or another Web3 wallet is required. Please install one to continue.');
+    throw new Error('No Web3 wallet detected');
   }
 }
 
 async function disconnectWallet() {
-  walletAddress = null;
-  isWalletConnected = false;
-  updateWalletUI();
-  console.log('Wallet disconnected');
+  try {
+    if (privyInstance && privyUser) {
+      await privyInstance.logout();
+      privyUser = null;
+    }
+    
+    walletAddress = null;
+    isWalletConnected = false;
+    updateWalletUI();
+    console.log('Wallet disconnected');
+  } catch (error) {
+    console.error('Error disconnecting wallet:', error);
+  }
 }
 
 async function switchToMegaETH() {
   try {
-    // Try to switch to MegaETH
-    await window.ethereum.request({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId: '0x10e6' }], // 4326 in hex
-    });
+    if (window.ethereum) {
+      // Try to switch to MegaETH
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: '0x10e6' }], // 4326 in hex
+      });
+    }
   } catch (switchError) {
     // Network doesn't exist, add it
-    if (switchError.code === 4902) {
+    if (switchError.code === 4902 && window.ethereum) {
       try {
         await window.ethereum.request({
           method: 'wallet_addEthereumChain',
@@ -387,14 +470,34 @@ async function updateWalletBalance() {
   if (!isWalletConnected || !walletAddress) return;
   
   try {
-    const balance = await window.ethereum.request({
-      method: 'eth_getBalance',
-      params: [walletAddress, 'latest']
-    });
-    
-    // Convert from wei to ETH
-    const ethBalance = (parseInt(balance, 16) / 1e18).toFixed(4);
-    document.getElementById('wallet-balance').textContent = `${ethBalance} ETH`;
+    if (window.ethereum) {
+      const balance = await window.ethereum.request({
+        method: 'eth_getBalance',
+        params: [walletAddress, 'latest']
+      });
+      
+      // Convert from wei to ETH
+      const ethBalance = (parseInt(balance, 16) / 1e18).toFixed(4);
+      document.getElementById('wallet-balance').textContent = `${ethBalance} ETH`;
+    } else {
+      // Fallback using MegaETH RPC
+      const response = await fetch('https://mainnet.megaeth.com/rpc', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          method: 'eth_getBalance',
+          params: [walletAddress, 'latest'],
+          id: 1
+        })
+      });
+      
+      const data = await response.json();
+      if (data.result) {
+        const ethBalance = (parseInt(data.result, 16) / 1e18).toFixed(4);
+        document.getElementById('wallet-balance').textContent = `${ethBalance} ETH`;
+      }
+    }
   } catch (error) {
     console.error('Error getting balance:', error);
     document.getElementById('wallet-balance').textContent = 'Error loading balance';
@@ -443,12 +546,12 @@ document.addEventListener('click', function(event) {
   }
 });
 
-// Listen for account changes
+// Listen for account changes (MetaMask fallback)
 if (window.ethereum) {
   window.ethereum.on('accountsChanged', function (accounts) {
-    if (accounts.length === 0) {
+    if (accounts.length === 0 && !privyUser) {
       disconnectWallet();
-    } else if (accounts[0] !== walletAddress) {
+    } else if (accounts[0] !== walletAddress && !privyUser) {
       walletAddress = accounts[0];
       updateWalletUI();
       updateWalletBalance();
@@ -461,23 +564,9 @@ if (window.ethereum) {
   });
 }
 
-// Check if already connected on page load
+// Initialize on page load
 window.addEventListener('load', async function() {
-  if (window.ethereum) {
-    try {
-      const accounts = await window.ethereum.request({
-        method: 'eth_accounts'
-      });
-      if (accounts.length > 0) {
-        walletAddress = accounts[0];
-        isWalletConnected = true;
-        updateWalletUI();
-        updateWalletBalance();
-      }
-    } catch (error) {
-      console.error('Error checking wallet connection:', error);
-    }
-  }
+  await initPrivy();
 });
 
 // Get token address from URL
