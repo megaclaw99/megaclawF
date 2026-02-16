@@ -13,10 +13,10 @@ const CONFIG = {
   SITE_DOMAIN: "megaclaw.io",
 
   // ── Chain ────────────────────────────────────────────────
-  CHAIN_NAME: "MegaETH Chain",
+  CHAIN_NAME: "MegaETH",
   CHAIN_ID: 4326,
   CHAIN_RPC: "https://mainnet.megaeth.com/rpc",
-  EXPLORER_URL: "https://megaeth.blockscout.com",
+  EXPLORER_URL: "https://mega.etherscan.io/",
   EXPLORER_API: "https://megaeth.blockscout.com/api/v2",
   EXPLORER_NAME: "MegaETH Explorer",
 
