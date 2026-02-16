@@ -159,6 +159,19 @@
       background: transparent;
       color: #fff;
     }
+    /* Dark mode fixes for better text visibility */
+    body.dark-mode .action-card h3 {
+      color: #fff !important;
+    }
+    body.dark-mode .contract-label {
+      color: #a0a0a0 !important;
+    }
+    body.dark-mode .stat-label {
+      color: #a0a0a0 !important;
+    }
+    body.dark-mode .chart-section h3 {
+      color: #fff !important;
+    }
   </style>
 </head>
 <body>
@@ -211,7 +224,7 @@
 
         <div class="action-card">
           <h3>Trade</h3>
-          <a href="#" id="dex-link" target="_blank" class="btn-trade">Buy on DEX</a>
+          <a href="#" id="dex-link" target="_blank" class="btn-trade">Buy</a>
           <a href="#" id="sell-link" target="_blank" class="btn-trade">Sell</a>
         </div>
 
@@ -231,7 +244,7 @@
 
         <div class="action-card">
           <h3>Admin</h3>
-          <a href="#" id="admin-link" class="btn-trade">Manage Fees →</a>
+          <a href="#" id="admin-link" class="btn-trade">Manage</a>
         </div>
       </div>
     </div>
