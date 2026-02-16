@@ -70,7 +70,7 @@ function timeAgo(d) {
 const launchesEl = document.getElementById('launches-container');
 
 function renderCard(t, isNew) {
-    const link = CONFIG.EXPLORER_URL + '/token/' + t.address;
+    const tokenLink = `/tokens/${t.address}`;
     return `<div class="launch-card">
         <div class="launch-header">
             <div class="token-info">
@@ -91,7 +91,7 @@ function renderCard(t, isNew) {
         </div>
         <div class="launch-footer">
             <span class="launch-time">${t.timeStr || 'recently'}</span>
-            <a href="${link}" target="_blank" class="view-token">View Token</a>
+            <a href="${tokenLink}" class="view-token">View Token</a>
         </div>
     </div>`;
 }
