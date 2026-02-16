@@ -11,6 +11,11 @@ const CONFIG = require('./config');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ── Healthcheck ─────────────────────────────────────────────
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', service: 'megaclaw-frontend' });
+});
+
 // ── Static files ────────────────────────────────────────────
 app.use(express.static(path.join(__dirname, 'public')));
 
