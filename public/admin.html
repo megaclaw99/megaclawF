@@ -349,6 +349,19 @@ let userAddress = null;
 let tokenData = null;
 let creatorAddress = null;
 
+// MegaETH Network Configuration
+const MEGAETH_NETWORK = {
+  chainId: '0x10e6', // 4326 in hex
+  chainName: 'MegaETH Mainnet',
+  nativeCurrency: {
+    name: 'ETH',
+    symbol: 'ETH',
+    decimals: 18
+  },
+  rpcUrls: ['https://mainnet.megaeth.com/rpc'],
+  blockExplorerUrls: ['https://megaeth.blockscout.com/', 'https://mega.etherscan.io/']
+};
+
 // Theme toggle
 const themeToggle = document.getElementById('theme-toggle');
 if ((localStorage.getItem('theme') || 'light') === 'dark') {
@@ -392,6 +405,48 @@ async function loadTokenInfo(address) {
   }
 }
 
+// Network switching functions
+async function switchToMegaETH() {
+  if (!window.ethereum) return false;
+  
+  try {
+    // Try to switch to MegaETH
+    await window.ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: MEGAETH_NETWORK.chainId }],
+    });
+    return true;
+  } catch (switchError) {
+    // Network doesn't exist, add it
+    if (switchError.code === 4902) {
+      try {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [MEGAETH_NETWORK],
+        });
+        return true;
+      } catch (addError) {
+        console.error('Failed to add MegaETH network:', addError);
+        return false;
+      }
+    }
+    console.error('Failed to switch to MegaETH:', switchError);
+    return false;
+  }
+}
+
+async function checkNetwork() {
+  if (!window.ethereum) return true;
+  
+  try {
+    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+    return chainId === MEGAETH_NETWORK.chainId;
+  } catch (error) {
+    console.error('Error checking network:', error);
+    return false;
+  }
+}
+
 // Wallet Connection (Privy Integration)
 document.getElementById('connect-wallet-btn').addEventListener('click', async () => {
   try {
@@ -405,6 +460,13 @@ document.getElementById('connect-wallet-btn').addEventListener('click', async ()
       if (wallet) {
         walletConnected = true;
         userAddress = wallet.address;
+        
+        // Switch to MegaETH network
+        const networkSwitched = await switchToMegaETH();
+        if (!networkSwitched) {
+          alert('Please switch to MegaETH Mainnet (Chain ID: 4326) to claim fees');
+        }
+        
         updateWalletUI();
         await loadFeeData();
       }
@@ -414,6 +476,14 @@ document.getElementById('connect-wallet-btn').addEventListener('click', async ()
         const accounts = await window.ethereum.request({
           method: 'eth_requestAccounts'
         });
+        
+        // Switch to MegaETH network first
+        const networkSwitched = await switchToMegaETH();
+        if (!networkSwitched) {
+          alert('Please switch to MegaETH Mainnet (Chain ID: 4326) to claim fees');
+          return;
+        }
+        
         walletConnected = true;
         userAddress = accounts[0];
         updateWalletUI();
@@ -499,6 +569,14 @@ async function claimFees() {
     return;
   }
   
+  // Check if on correct network
+  const isCorrectNetwork = await checkNetwork();
+  if (!isCorrectNetwork) {
+    alert('Please switch to MegaETH Mainnet (Chain ID: 4326) to claim fees');
+    await switchToMegaETH();
+    return;
+  }
+  
   // Check if user is the creator
   const isCreator = creatorAddress && userAddress.toLowerCase() === creatorAddress.toLowerCase();
   if (!isCreator) {
@@ -551,6 +629,35 @@ setInterval(() => {
     loadFeeData();
   }
 }, 30000);
+
+// Network change listener
+if (window.ethereum) {
+  window.ethereum.on('chainChanged', async (chainId) => {
+    if (walletConnected) {
+      const isCorrectNetwork = chainId === MEGAETH_NETWORK.chainId;
+      if (!isCorrectNetwork) {
+        alert('Please switch back to MegaETH Mainnet (Chain ID: 4326) to claim fees');
+        // Optionally auto-switch back
+        await switchToMegaETH();
+      }
+      await loadFeeData(); // Reload fee data after network change
+    }
+  });
+
+  window.ethereum.on('accountsChanged', (accounts) => {
+    if (accounts.length === 0) {
+      // User disconnected wallet
+      walletConnected = false;
+      userAddress = null;
+      location.reload(); // Refresh page to reset UI
+    } else if (userAddress !== accounts[0]) {
+      // User switched accounts
+      userAddress = accounts[0];
+      updateWalletUI();
+      loadFeeData();
+    }
+  });
+}
 </script>
 
 </body>
