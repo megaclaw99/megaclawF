@@ -9,7 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   
-  <!-- Privy + React loaded via esm.sh module (see script below) -->
+  <!-- Privy wallet widget (pre-built bundle) -->
+  <script src="/js/privy-widget.js" defer></script>
   
   <style>
     .admin-page {
@@ -287,105 +288,6 @@
 
 </div>
 
-<!-- ── Privy wallet (React island) ──────────────────────────────────────── -->
-<script type="module">
-import React, { useState, useEffect, useRef } from 'https://esm.sh/react@18.3.1';
-import { createRoot } from 'https://esm.sh/react-dom@18.3.1/client';
-import { PrivyProvider, usePrivy, useLogin, useLogout, useWallets }
-  from 'https://esm.sh/@privy-io/react-auth@3.13.1?deps=react@18.3.1,react-dom@18.3.1';
-
-const h = React.createElement;
-
-const megaETH = {
-  id: 4326,
-  name: 'MegaETH Mainnet',
-  network: 'megaeth-mainnet',
-  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-  rpcUrls: {
-    default: { http: ['https://mainnet.megaeth.com/rpc'] },
-    public:  { http: ['https://mainnet.megaeth.com/rpc'] },
-  },
-  blockExplorers: {
-    default: { name: 'MegaETH Explorer', url: 'https://mega.etherscan.io' }
-  }
-};
-
-function WalletUI() {
-  const { ready, authenticated, user } = usePrivy();
-  const { login } = useLogin();
-  const { logout } = useLogout();
-  const { wallets } = useWallets();
-  const [open, setOpen] = useState(false);
-  const [balance, setBalance] = useState(null);
-  const dropRef = useRef(null);
-
-  const address = wallets[0]?.address
-    || user?.linkedAccounts?.find(a => a.type === 'wallet')?.address;
-
-  useEffect(() => {
-    if (!address) return;
-    fetch('https://mainnet.megaeth.com/rpc', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ jsonrpc: '2.0', method: 'eth_getBalance', params: [address, 'latest'], id: 1 })
-    })
-      .then(r => r.json())
-      .then(d => { if (d.result) setBalance((parseInt(d.result, 16) / 1e18).toFixed(4) + ' ETH'); })
-      .catch(() => {});
-  }, [address]);
-
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e) => { if (dropRef.current && !dropRef.current.contains(e.target)) setOpen(false); };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [open]);
-
-  if (!ready) return h('button', { className: 'wallet-btn', disabled: true }, 'Loading...');
-  if (!authenticated || !address) return h('button', { className: 'wallet-btn', onClick: login }, 'Connect Wallet');
-
-  const short = `${address.slice(0, 6)}...${address.slice(-4)}`;
-
-  return h('div', { className: 'wallet-dropdown', ref: dropRef },
-    h('button', { className: 'wallet-btn connected', onClick: () => setOpen(o => !o) }, short),
-    open && h('div', { className: 'wallet-dropdown-content show' },
-      h('div', { className: 'wallet-info' },
-        h('div', { className: 'wallet-address' }, address),
-        h('div', { className: 'wallet-balance' }, balance || '— ETH'),
-        h('button', { className: 'disconnect-btn', onClick: () => { logout(); setOpen(false); } }, 'Disconnect'),
-        h('div', {
-          style: { fontSize: '11px', color: '#888', marginTop: '10px', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }
-        },
-          h('img', { src: 'https://privy.io/favicons/favicon-32x32.png', width: 12, height: 12, alt: '' }),
-          'Protected by Privy'
-        )
-      )
-    )
-  );
-}
-
-function App() {
-  return h(PrivyProvider,
-    {
-      appId: 'clp0z7zeg0b9w0cjy6vzd3o6w',
-      config: {
-        loginMethods: ['twitter', 'wallet'],
-        defaultChain: megaETH,
-        supportedChains: [megaETH],
-        embeddedWallets: { createOnLogin: 'users-without-wallets' },
-        appearance: {
-          theme: 'light',
-          accentColor: '#19191A',
-          logo: 'https://megaclaw.io/logo.jpg'
-        }
-      }
-    },
-    h(WalletUI, null)
-  );
-}
-
-createRoot(document.getElementById('privy-wallet-root')).render(h(App, null));
-</script>
 
 <!-- ── Theme + page utilities ─────────────────────────────────────────────── -->
 <script>
