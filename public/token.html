@@ -9,9 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   
-  <!-- React 18 -->
-  <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+  <!-- Privy + React loaded via esm.sh module (see script below) -->
   
   <style>
     .token-page {
@@ -371,12 +369,13 @@
 
 <!-- ── Privy wallet (React island) ──────────────────────────────────────── -->
 <script type="module">
-const { createElement: h, useState, useEffect, useRef } = window.React;
-const { createRoot } = window.ReactDOM;
+// Single React instance from esm.sh — no UMD conflict
+import React, { useState, useEffect, useRef } from 'https://esm.sh/react@18.3.1';
+import { createRoot } from 'https://esm.sh/react-dom@18.3.1/client';
+import { PrivyProvider, usePrivy, useLogin, useLogout, useWallets }
+  from 'https://esm.sh/@privy-io/react-auth@3.13.1?deps=react@18.3.1,react-dom@18.3.1';
 
-// Privy React SDK via esm.sh (same CDN = shared React instance via deps pin)
-const { PrivyProvider, usePrivy, useLogin, useLogout, useWallets } =
-  await import('https://esm.sh/@privy-io/react-auth@3.13.1?deps=react@18.3.1,react-dom@18.3.1');
+const h = React.createElement;
 
 // ── MegaETH chain ─────────────────────────────────────────────────────────────
 const megaETH = {
