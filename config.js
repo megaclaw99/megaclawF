@@ -21,7 +21,8 @@ const CONFIG = {
   EXPLORER_NAME: "MegaETH Explorer",
 
   // ── Contracts ────────────────────────────────────────────
-  TOKEN_FACTORY: "0xc2aa358BfAA1cEC955c09C1c2E164C486283b1F7",
+  TOKEN_FACTORY: "0x3B41F576b423ac8240520c188c995da601296C9E",
+  FEE_DISTRIBUTION: "0xb3368172A7CF3DE737b3Fb8621114E50866F9E5a",
 
   // ── Featured Token (the card on the homepage) ────────────
   FEATURED_SYMBOL: "$MEGACLAW",
